@@ -1,0 +1,42 @@
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env
+.env.*
+
+# Logs
+*.log
+
+# Coverage / test reports
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Build / dist
+build/
+dist/
+*.egg-info/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# IDE / editors
+.vscode/
+.idea/
+*.iml
+
+# Misc
+*.swp
+*.swo
+*.tmp
+*.bak
