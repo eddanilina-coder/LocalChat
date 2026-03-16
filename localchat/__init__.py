@@ -1,0 +1,2 @@
+"""LAN Messenger core package."""
+

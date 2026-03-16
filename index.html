@@ -745,6 +745,7 @@
       let userId = null;
       let reconnectTimer = null;
       let historyLoaded = false;
+      let isRegistered = false;
 
       const messagesEl = document.getElementById("messages");
       const messageInputEl = document.getElementById("messageInput");
@@ -905,15 +906,20 @@
         setStatus(false, "Подключаемся…");
 
         ws.addEventListener("open", () => {
-          setStatus(true, "Онлайн");
           historyLoaded = false;
-          userHintEl.textContent = nickname ? "Вы: " + nickname : "";
+          isRegistered = false;
 
-          const helloMsg = {
-            type: "hello",
-            payload: { nickname: nickname },
+          const registerMsg = {
+            type: "register",
+            payload: { username: nickname },
           };
-          ws.send(JSON.stringify(helloMsg));
+          try {
+            ws.send(JSON.stringify(registerMsg));
+            setStatus(false, "Регистрируемся…");
+          } catch (e) {
+            console.error("Failed to send register message", e);
+            setStatus(false, "Ошибка регистрации");
+          }
         });
 
         ws.addEventListener("message", (event) => {
@@ -927,6 +933,14 @@
 
           const type = data.type;
           const payload = data.payload || {};
+
+          if (type === "registered") {
+            isRegistered = true;
+            setStatus(true, "Онлайн");
+            nickModalEl.style.display = "none";
+            userHintEl.textContent = nickname ? "Вы: " + nickname : "";
+            return;
+          }
 
           if (type === "history") {
             const messages = payload.messages || [];
@@ -965,6 +979,7 @@
         });
 
         ws.addEventListener("close", () => {
+          isRegistered = false;
           setStatus(false, "Отключено");
           renderUsers([]);
           scheduleReconnect();
@@ -986,7 +1001,7 @@
 
       function sendMessage() {
         const text = messageInputEl.value.trim();
-        if (!text || !ws || ws.readyState !== WebSocket.OPEN) {
+        if (!text || !ws || ws.readyState !== WebSocket.OPEN || !isRegistered) {
           return;
         }
 
@@ -1052,8 +1067,6 @@
         const value = nickInputEl.value.trim();
         if (!value) return;
         nickname = value;
-        userHintEl.textContent = "Вы: " + nickname;
-        nickModalEl.style.display = "none";
         connectWebSocket();
       }
 
